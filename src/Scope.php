@@ -11,16 +11,16 @@ class Scope {
         return $this->values[$key]->provide();
     }
     
-    public function provider($key, $value) {
+    public function set($key, $value) {
         $this->values[$key] = $value;
     }
     
-    public function constant($key, $value, $values=array()) {
-        $this->provider($key, new \ConstantProvider(null, null, $value));
+    public function constant($value, $values=array()) {
+        return new \ConstantProvider(null, null, $value);
     }
     
-    public function variable($key, $value, $values=array()) {
-        $this->provider($key, new VariableProvider(
+    public function variable($value, $values=array()) {
+        return new VariableProvider(
             new \AnnotationResolver(
                 new \ParameterResolver()
             ),
@@ -31,11 +31,11 @@ class Scope {
                 )
             ),
             $value
-        ));
+        );
     }
     
-    public function method($key, $value, $values=array()) {
-        $this->provider($key, new MethodProvider(
+    public function method($value, $values=array()) {
+        return new MethodProvider(
             new \AnnotationResolver(
                 new \ParameterResolver()
             ),
@@ -46,11 +46,11 @@ class Scope {
                 )
             ),
             $value
-        ));
+        );
     }
     
-    public function factory($key, $value, $values=array()) {
-        $this->provider($key, new FactoryProvider(
+    public function factory($value, $values=array()) {
+        return new FactoryProvider(
             new \AnnotationResolver(
                 new \ParameterResolver()
             ),
@@ -61,11 +61,11 @@ class Scope {
                 )
             ),
             $value
-        ));
+        );
     }
 
-    public function service($key, $value, $values=array()) {
-        $this->provider($key, new ServiceProvider(
+    public function service($value, $values=array()) {
+        return new ServiceProvider(
             new \AnnotationResolver(
                 new \ParameterResolver()
             ),
@@ -76,6 +76,6 @@ class Scope {
                 )
             ),
             $value
-        ));
+        );
     }
 }
