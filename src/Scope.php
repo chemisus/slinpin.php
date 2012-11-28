@@ -3,8 +3,28 @@
 class Scope {
     private $values = array();
     
+    public function __construct() {
+        $scope = $this;
+
+        $this->set('get', $this->constant(function ($key, $values=array()) use ($scope) {
+            return $scope->get($key);
+        }));
+
+        $this->set('invoke', $this->constant(function ($value, $values=array()) use ($scope) {
+            return $scope->method($value)->provide()->invoke($value[0], $values);
+        }));
+
+        $this->set('instance', $this->constant(function ($value, $values=array()) use ($scope) {
+            return $scope->factory($value)->provide()->invoke($values);
+        }));
+    }
+    
+    public function has($key) {
+        return isset($this->values[$key]);
+    }
+    
     public function get($key) {
-        if (!isset($this->values[$key])) {
+        if (!$this->has($key)) {
             return null;
         }
         
