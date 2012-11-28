@@ -15,14 +15,19 @@ class FactoryInvoker {
         $this->keys = $keys;
     }
     
-    public function invoke($values=array()) {
+    public function invoke($locals=array()) {
+        $values = $this->values;
+        
+        foreach ($this->keys as $index=>$key) {
+            if (isset($locals[$key])) {
+                $values[$index] = $locals[$key];
+            }
+        }
+        
         $reflection = new \ReflectionClass($this->provider->value());
         
-        if ($this->provider->reflection()) {
-            return $reflection->newInstanceArgs(array_merge(
-                $this->values,
-                $values
-            ));
+        if ($reflection) {
+            return $reflection->newInstanceArgs($values);
         }
         
         return $reflection->newInstanceWithoutConstructor();
