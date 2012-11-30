@@ -15,6 +15,36 @@ class Scope extends Container {
         return $value;
     }
     
+    public function __construct($values=array()) {
+        $this->set('scope', $this->constant($this));
+
+        $this->set('invoke', $this->service(function ($scope) {
+            return function ($key, $values=array()) use ($scope) {
+                return $scope->invoke($key, $values);
+            };
+        }));
+        
+        $this->set('inject', $this->service(function ($scope) {
+            return function ($value, $values=array(), $keys=null) use ($scope) {
+                return $scope->method($value, $values, $keys);
+            };
+        }));
+        
+        $this->set('instance', $this->service(function ($scope) {
+            return function ($value, $values=array(), $keys=null) use ($scope) {
+                return $scope->factory($value, $values, $keys);
+            };
+        }));
+        
+        foreach ($values as $key=>$value) {
+            if (!($value instanceof Providable)) {
+                $value = $this->constant($value);
+            }
+            
+            $this->set($key, $value);
+        }
+    }
+    
     public function invoker($value, $values=array(), $keys=null) {
         return new Method(
             new Injector(new Container($values),
