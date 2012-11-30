@@ -2,7 +2,7 @@
 
 namespace Slinpin;
 
-class Scope extends Container {
+class Scope extends Container implements Scopable {
     protected function doGet($value) {
         return $value->provide();
     }

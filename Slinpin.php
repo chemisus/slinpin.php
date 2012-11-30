@@ -6,6 +6,7 @@ require_once('src/Slinpin/Providable.php');
 require_once('src/Slinpin/Containable.php');
 require_once('src/Slinpin/Invokable.php');
 require_once('src/Slinpin/Paramable.php');
+require_once('src/Slinpin/Scopable.php');
 
 // classes
 require_once('src/Slinpin/AnnotationResolver.php');
