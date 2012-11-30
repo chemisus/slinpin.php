@@ -15,7 +15,7 @@ class Scope extends Container {
         return $value;
     }
     
-    public function __construct() {
+    public function __construct($values=array()) {
         $this->set('scope', $this->constant($this));
 
         $this->set('invoke', $this->service(function ($scope) {
@@ -35,6 +35,14 @@ class Scope extends Container {
                 return $scope->factory($value, $values, $keys);
             };
         }));
+        
+        foreach ($values as $key=>$value) {
+            if (!($value instanceof Providable)) {
+                $value = $this->constant($value);
+            }
+            
+            $this->set($key, $value);
+        }
     }
     
     public function invoker($value, $values=array(), $keys=null) {
