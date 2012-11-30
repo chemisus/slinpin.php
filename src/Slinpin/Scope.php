@@ -18,23 +18,23 @@ class Scope extends Container {
     public function __construct() {
         $this->set('scope', $this->constant($this));
 
-        $this->set('invoke', function ($scope) {
+        $this->set('invoke', $this->service(function ($scope) {
             return function ($key, $values=array()) use ($scope) {
                 return $scope->invoke($key, $values);
             };
-        });
+        }));
         
-        $this->set('inject', function ($scope) {
+        $this->set('inject', $this->service(function ($scope) {
             return function ($value, $values=array(), $keys=null) use ($scope) {
                 return $scope->method($value, $values, $keys);
             };
-        });
+        }));
         
-        $this->set('instance', function ($scope) {
+        $this->set('instance', $this->service(function ($scope) {
             return function ($value, $values=array(), $keys=null) use ($scope) {
                 return $scope->factory($value, $values, $keys);
             };
-        });
+        }));
     }
     
     public function invoker($value, $values=array(), $keys=null) {
