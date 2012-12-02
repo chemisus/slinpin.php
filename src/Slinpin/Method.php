@@ -23,8 +23,10 @@ class Method implements Providable, Invokable {
     
     public function invoke($values = array()) {
         $keys = $this->resolver->keys();
+
+        $injector = new Injector(new Container($values), $this->injector);
         
-        $values = $this->injector->inject($keys, $values);
+        $values = $injector->inject($keys);
         
         return $this->method->invoke($values);
     }
