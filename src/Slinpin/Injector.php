@@ -15,6 +15,10 @@ class Injector implements Injectable {
     
     public function inject($keys, $values=array(), $injected=array()) {
         foreach ($keys as $index=>$key) {
+            if (!isset($injected[$index])) {
+                $values[$index] = null;
+            }
+            
             if (!isset($injected[$index]) && $this->container->has($key)) {
                 $values[$index] = $this->container->get($key);
                 
