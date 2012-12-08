@@ -3,19 +3,33 @@
 namespace Slinpin;
 
 class Scope extends Container implements Scopable {
-    protected function doGet($value) {
-        return $value->provide();
+
+    private $parent;
+
+    public function hasParent() {
+        return $this->parent !== null;
     }
-    
-    protected function doSet($key, Providable $value) {
+
+    public function parent() {
+        return $this->parent;
+    }
+
+    public function contains($key) {
         if ($this->has($key)) {
-            throw new Exception;
+            return true;
         }
-        
-        return $value;
+
+        if ($this->hasParent()) {
+            return $this->parent()->contains($key);
+        }
+
+        return false;
     }
-    
-    public function __construct($values=array()) {
+
+    public function __construct($values=array(),
+        Scopable $parent=null) {
+        $this->parent = $parent;
+
         $this->set('scope', $this->constant($this));
 
         $this->set('invoke', $this->service(function ($scope) {
@@ -23,28 +37,26 @@ class Scope extends Container implements Scopable {
                 return $scope->invoke($key, $values);
             };
         }));
-        
+
         $this->set('inject', $this->service(function ($scope) {
             return function ($value, $values=array(), $keys=null) use ($scope) {
                 return $scope->method($value, $values, $keys);
             };
         }));
-        
+
         $this->set('instance', $this->service(function ($scope) {
             return function ($value, $values=array(), $keys=null) use ($scope) {
                 return $scope->factory($value, $values, $keys);
             };
         }));
-        
-        foreach ($values as $key=>$value) {
-            if (!($value instanceof Providable)) {
-                $value = $this->constant($value);
-            }
-            
-            $this->set($key, $value);
-        }
+
+        $this->import($values);
     }
-    
+
+    public function subscope($values=array()) {
+        return new Scope($values, $this);
+    }
+
     public function invoker($value, $values=array(), $keys=null) {
         return new Method(
             new Injector(new Container($values),
@@ -60,15 +72,25 @@ class Scope extends Container implements Scopable {
             $value
         );
     }
-    
+
     public function constant($value) {
         return new Constant($value);
     }
-    
+
+    public function import($values) {
+        foreach ($values as $key=>$value) {
+            if (!($value instanceof Providable)) {
+                $value = $this->constant($value);
+            }
+
+            $this->set($key, $value);
+        }
+    }
+
     public function variable($value, $values=array(), $keys=null) {
         return new Variable($this->method($value, $values, $keys));
     }
-    
+
     public function method($value, $values=array(), $keys=null) {
         if (is_array($value)) {
             $invoker = new MethodInvoker($value);
@@ -76,27 +98,43 @@ class Scope extends Container implements Scopable {
         else {
             $invoker = new FunctionInvoker($value);
         }
-        
+
         return $this->invoker($invoker, $values, $keys);
     }
-    
+
     public function factory($value, $values=array(), $keys=null) {
         return $this->invoker(new ConstructorInvoker($value), $values, $keys);
     }
-    
+
     public function service($value, $values=array(), $keys=null) {
         return new Service($this->method($value, $values, $keys));
     }
-    
+
     public function invoke($key, $values=array()) {
         return $this->get($key)->invoke($values);
     }
-    
+
     public function inject($method, $values=array(), $keys=null) {
         return $this->method($method, $values, $keys)->invoke();
     }
-    
+
     public function instance($class, $values=array(), $keys=null) {
         return $this->factory($class, $values, $keys)->invoke();
+    }
+
+    protected function doGet($items, $key) {
+        if ($this->has($key)) {
+            return parent::doGet($items, $key)->provide();
+        }
+
+        if (!$this->hasParent()) {
+            throw new Exception;
+        }
+
+        return $this->parent()->get($key);
+    }
+
+    protected function doSet(&$items, $key, Providable $value) {
+        return parent::doSet($items, $key, $value);
     }
 }

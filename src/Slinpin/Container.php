@@ -3,31 +3,31 @@
 namespace Slinpin;
 
 class Container implements Containable {
-    private $values = array();
+    private $items = array();
     
     public function get($key) {
-        return $this->doGet($this->values[$key]);
+        return $this->doGet($this->items, $key);
     }
     
     public function set($key, $value) {
-        $this->values[$key] = $this->doSet($key, $value);
-        
-        return $this;
+        return $this->doSet($this->items, $key, $value);
     }
 
     public function has($key) {
-        return isset($this->values[$key]);
+        return isset($this->items[$key]);
     }
     
     public function __construct($values=array()) {
-        $this->values = $values;
+        $this->items = $values;
     }
     
-    protected function doGet($value) {
-        return $value;
+    protected function doGet($items, $key) {
+        return $items[$key];
     }
     
-    protected function doSet($key, $value) {
-        return $value;
+    protected function doSet(&$items, $key, $value) {
+        $items[$key] = $value;
+        
+        return $this;
     }
 }
