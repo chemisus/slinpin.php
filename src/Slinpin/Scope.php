@@ -78,7 +78,7 @@ class Scope extends Container implements Scopable {
     }
 
     public function import($values) {
-        foreach ($values as $key=>$value) {
+        foreach ((array)$values as $key=>$value) {
             if (!($value instanceof Providable)) {
                 $value = $this->constant($value);
             }
